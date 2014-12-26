@@ -3,7 +3,7 @@ var Mongoman = require(process.cwd() + '/api/lib/mongoman');
 var Joi      = require('joi');
 var validate = require(process.cwd() + '/api/lib/validate');
 
-var Game = Mongoman.model('game');
+var Season = Mongoman.model('season');
 
 module.exports = function accountController (api) {
   return {
@@ -14,28 +14,14 @@ module.exports = function accountController (api) {
     create : function (req, res, next) {
       var inputs = req.body;
       validate(inputs, {
-        home     : Joi.object().keys({
-          team_id : Joi.string().token().required(),
-          players : Joi.array().optional().includes(Joi.token()),
-          score   : Joi.number().integer()
-        }),
-        away     : Joi.object().keys({
-          team_id : Joi.string().token().required(),
-          players : Joi.array().optional().includes(Joi.token()),
-          score   : Joi.number().integer()
-        }),
-        season_id : Joi.string().token().required(),
-        refs : Joi.array().optional(),
-        game     : Joi.object().keys({
-          date : Joi.date().iso().required(),
-          time : Joi.string().required()
-        })
+        name     : Joi.string().required().min(1).max(50),
+        league   : Joi.string().required().min(1).max(50),
       }, function save (result, callback) {
-        Mongoman.save('game', req.body, next, function ( game ) {
+        Mongoman.save('season', req.body, next, function ( season ) {
           res.data = {
             success : true,
-            game  : game,
-            message : 'Game ' + inputs.name + ' created'
+            season  : season,
+            message : 'Season ' + inputs.name + ' created'
           };
           return callback();
         });
@@ -49,33 +35,33 @@ module.exports = function accountController (api) {
     read : function (req, res, next) {
       var inputs = req.query;
 
-      // take a game array and build the response body
-      function getResult (games) {
-        var success = !!(games && games.length);
+      // take a season array and build the response body
+      function getResult (seasons) {
+        var success = !!(seasons && seasons.length);
         return {
           success : success,
-          message : !success ? 'No games found' : undefined,
-          games : games || []
+          message : !success ? 'No seasons found' : undefined,
+          seasons : seasons || []
         };
       }
 
       // if the client performed a search
       if (Object.keys(req.query).length) {
         validate(inputs, {}, function (result, callback) {
-          Game.find(inputs, function (error, games) {
-            res.data = getResult(games)
+          Season.find(inputs, function (error, seasons) {
+            res.data = getResult(seasons)
             return callback();
           });
         }, next);
 
       // otherwise, return the last 10 registered
       } else {
-        Game.find({
+        Season.find({
           created : {
             $lte : new Date()
           }
-        }).limit(10).exec(function (error, games) {
-          res.data = getResult(games)
+        }).limit(10).exec(function (error, seasons) {
+          res.data = getResult(seasons)
           return next();
         });
       }
