@@ -3,13 +3,6 @@
 //
 
 
-
-////////////////////////////////////////////////////////////////////////
-//
-//  Form Validation Driectives
-//
-////////////////////////////////////////////////////////////////////////
-
 //
 // Custon Validators
 //
@@ -96,7 +89,7 @@ simpleApp.directive("validate", [function () {
       {
         error   : 'required',
         message : 'is a required field'
-      }
+      },
     ];
 
     var errorMsg = 'is invalid';
