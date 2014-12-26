@@ -14,12 +14,12 @@ test.stash.name = 'Puck Buddies ' + test.seed;
 // Test set execution
 
 test.execSet('Team', [
-  add,
-  search,
-  retrieve,
-  update,
-  addPlayerToTeam,
-  remove,
+  // add,
+  // search,
+  // retrieve,
+  // update,
+  // addPlayerToTeam,
+  // remove,
   
 ]);
 
