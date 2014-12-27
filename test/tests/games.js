@@ -10,29 +10,29 @@ var tester = require(process.cwd() + '/test/tester');
 var test = tester();
 
 test.stash.home = {
-    team_id : '123456789',
+    team_id : 'HOME' + test.seed,
     players : ['123', '456'],
     score   : 3
   };
 
 test.stash.away = {
-    team_id : '987654321',
+    team_id : 'AWAY' + test.seed,
     players : ['789', '210'],
     score   : 2
   };
 
-test.stash.seasonId = '999999';
+test.stash.season_id = 'SEASON' + test.seed;
 test.stash.refs = ['321', '654'];
 
-test.stash.game = {
-  date : '2015-02-01',
-  time : '10:30PM'
-}
+
+test.stash.date_time = new Date('2015-2-1 20:30 EST').getTime();
 // Test set execution
 
 test.execSet('Game', [
   add,
-  search,
+  search_team,
+  search_season,
+  search_season_team,
   retrieve,
   update,
   remove,
@@ -54,9 +54,9 @@ function add (stash, next) {
         form  : {
           home : stash.home,
           away : stash.away,
-          seasonId : stash.seasonId,
+          season_id : stash.season_id,
           refs : stash.refs,
-          game : stash.game
+          date_time : stash.date_time
         }
       }, function (response, body) {
         return next(null, done);
@@ -67,20 +67,59 @@ function add (stash, next) {
 
 // Search
 //
-// expects - game name
-function search (stash, next) {
+// expects - team id
+function search_team (stash, next) {
   describe('Search for a game', function () {
     it('should return a list of matching games', function (done) {
       test.request.get({
         route : '/games',
-        qs    : { name : stash.name },
+        qs    : { team_id : stash.home.team_id },
       }, function (response, body) {
         assert.notEqual(body.games.length, 0, 'No games found from the search');
-console.log('Body === ', body)
         var game = body.games[0];
-        assert.equal(game.name, stash.name);
-        assert.equal(game.league, stash.league);
+        assert.equal(game.home.team_id, stash.home.team_id);
+        assert.equal(game.away.team_id, stash.away.team_id);
+        stash.gameId =  game['_id'];
 
+        return next(null, done);
+      });
+    });
+  });
+}
+
+function search_season (stash, next) {
+  describe('Search for a game', function () {
+    it('should return a list of matching games', function (done) {
+      test.request.get({
+        route : '/games',
+        qs    : { season_id : stash.season_id },
+      }, function (response, body) {
+        assert.notEqual(body.games.length, 0, 'No games found from the search');
+        var game = body.games[0];
+        assert.equal(game.home.team_id, stash.home.team_id);
+        assert.equal(game.away.team_id, stash.away.team_id);
+        stash.gameId =  game['_id'];
+
+        return next(null, done);
+      });
+    });
+  });
+}
+
+function search_season_team (stash, next) {
+  describe('Search for a game', function () {
+    it('should return a list of matching games', function (done) {
+      test.request.get({
+        route : '/games',
+        qs    : { 
+                  season_id : stash.season_id,
+                  team_id : stash.home.team_id 
+                },
+      }, function (response, body) {
+        assert.notEqual(body.games.length, 0, 'No games found from the search');
+        var game = body.games[0];
+        assert.equal(game.home.team_id, stash.home.team_id);
+        assert.equal(game.away.team_id, stash.away.team_id);
         stash.gameId =  game['_id'];
 
         return next(null, done);
@@ -99,9 +138,9 @@ function retrieve (stash, next) {
       test.request.get({
         route : '/games/' + stash.gameId,
       }, function (response, body) {
-        console.log('Body === ', body)
-        assert.equal(body.game.name, stash.name);
-        assert.equal(body.game.league, stash.league);
+        var game = body.game;
+        assert.equal(game.home.team_id, stash.home.team_id);
+        assert.equal(game.away.team_id, stash.away.team_id);
 
         stash.gameId =  body.game['_id'];
 
@@ -117,15 +156,17 @@ function retrieve (stash, next) {
 // expects - gameId
 function update (stash, next) {
   describe('Updating a game', function() {
-    it('should update game name', function (done) {
-      var newName = 'New Name ' + test.seed;
+    it('should update game time', function (done) {
+      var newDateObj = new Date('2015-2-5 19:30 EST');
+      var newDateTime = newDateObj.getTime();
       test.request.put({
         route : '/games/' + stash.gameId,
         form  : {
-          name : newName
+           date_time : newDateTime
         }
       }, function (response, body) {
-        assert.equal(body.game.name, newName);
+        var responseDateTime = new Date(body.game.date_time);
+        assert.equal(responseDateTime.getTime(), newDateObj.getTime());
 
         return next(null, done);
       });

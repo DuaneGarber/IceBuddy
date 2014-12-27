@@ -16,11 +16,11 @@ test.stash.name = {
 // Test set execution
 
 test.execSet('Player', [
-  // add,
-  // search,
-  // retrieve,
-  // update,
-  // remove
+  add,
+  search,
+  retrieve,
+  update,
+  remove
 ]);
 
 //

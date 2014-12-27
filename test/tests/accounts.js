@@ -21,9 +21,9 @@ test.stash = {
 // Test set execution
 
 test.execSet('Account', [
-  // signUp,
-  // retrieve,
-  // update
+  signUp,
+  retrieve,
+  update
 ]);
 
 //

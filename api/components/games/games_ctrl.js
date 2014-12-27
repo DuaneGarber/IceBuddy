@@ -16,20 +16,17 @@ module.exports = function accountController (api) {
       validate(inputs, {
         home     : Joi.object().keys({
           team_id : Joi.string().token().required(),
-          players : Joi.array().optional().includes(Joi.token()),
+          players : Joi.array().optional().includes(Joi.string().token()),
           score   : Joi.number().integer()
         }),
         away     : Joi.object().keys({
           team_id : Joi.string().token().required(),
-          players : Joi.array().optional().includes(Joi.token()),
+          players : Joi.array().optional().includes(Joi.string().token()),
           score   : Joi.number().integer()
         }),
         season_id : Joi.string().token().required(),
         refs : Joi.array().optional(),
-        game     : Joi.object().keys({
-          date : Joi.date().iso().required(),
-          time : Joi.string().required()
-        })
+        date_time : Joi.date().required(),
       }, function save (result, callback) {
         Mongoman.save('game', req.body, next, function ( game ) {
           res.data = {
@@ -46,6 +43,11 @@ module.exports = function accountController (api) {
     //
     // Read
     //
+    // Expects 
+    // season_id OR team_id
+    // IF season_id is only value, this query will return all games in this season
+    // IF team_id is only value, this query will return all games played by this team ever
+    // IF season_id AND team_id are both present, this query will return every game played by a team during this season
     read : function (req, res, next) {
       var inputs = req.query;
 
@@ -61,11 +63,58 @@ module.exports = function accountController (api) {
 
       // if the client performed a search
       if (Object.keys(req.query).length) {
-        validate(inputs, {}, function (result, callback) {
-          Game.find(inputs, function (error, games) {
-            res.data = getResult(games)
-            return callback();
-          });
+        validate(inputs, {
+          team_id : Joi.string().token().optional(),
+          season_id : Joi.string().token().optional()
+        }, function (result, callback) {
+
+          //If both parameters are present, return the and result
+          if ( inputs.team_id && inputs.season_id ) {
+            console.log('IF')
+            Game.find({
+                $and: [
+                    {
+                      season_id : inputs.season_id
+                    },
+                    {
+                      $or : [
+                          {
+                            'home.team_id' : inputs.team_id
+                          },
+                          {
+                            'away.team_id' : inputs.team_id
+                          }
+                      ]
+                    }
+                  ]
+                }, function (error, games) {
+                  res.data = getResult(games)
+                  return callback();
+                }
+            );
+          } else { 
+            console.log('ELSE')
+            console.log(inputs)
+            Game.find({
+              $or : [
+                      {
+                        'home.team_id' : inputs.team_id
+                      },
+                      {
+                        'away.team_id' : inputs.team_id
+                      },
+                      {
+                        season_id : inputs.season_id
+                      }
+                    ]
+            }, function (error, games) {
+              console.log('errror')
+              console.log(error)
+              console.log(games)
+              res.data = getResult(games)
+              return callback();
+            });
+          }
         }, next);
 
       // otherwise, return the last 10 registered
