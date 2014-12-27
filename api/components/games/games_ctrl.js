@@ -70,7 +70,6 @@ module.exports = function accountController (api) {
 
           //If both parameters are present, return the and result
           if ( inputs.team_id && inputs.season_id ) {
-            console.log('IF')
             Game.find({
                 $and: [
                     {
@@ -93,8 +92,6 @@ module.exports = function accountController (api) {
                 }
             );
           } else { 
-            console.log('ELSE')
-            console.log(inputs)
             Game.find({
               $or : [
                       {
@@ -108,9 +105,6 @@ module.exports = function accountController (api) {
                       }
                     ]
             }, function (error, games) {
-              console.log('errror')
-              console.log(error)
-              console.log(games)
               res.data = getResult(games)
               return callback();
             });
