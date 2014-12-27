@@ -33,6 +33,10 @@ exports.register = function  (api) {
   routeCrud('/seasons', controller('seasons'));
   routeCrud('/seasons/:seasonId', controller('seasons.season'));
 
+  // Games
+  routeCrud('/games', controller('games'));
+  routeCrud('/games/:gameId', controller('games.game'));
+
   // Players
   routeCrud('/players', controller('players'));
   routeCrud('/players/:playerId', controller('players.player'));

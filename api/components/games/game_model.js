@@ -16,9 +16,41 @@ module.exports = Mongoman.register('game', {
   season_id : Mongoman('Season Id').string().required().fin(),
   //Array of ref ids
   refs : Mongoman('Referees').array().default([]).fin(),
-  game :  {
-    date:  Mongoman('Game Date').date().required().fin(),
-    time : Mongoman('Game time').string().required().fin()
-  }
+  date_time : Mongoman('Game time').date().required().fin()
 
+},
+{
+  //Fix this
+  // virtuals : [ 
+  //   {
+  //     property : 'home.result',
+  //     get : function () {
+  //       if ( this.home.score > this.away.score ) {
+  //         return 'W';
+  //       } else if ( this.home.score === this.away.score ) {
+  //         return 'T';
+  //       } else {
+  //         return 'L';
+  //       }
+  //     },
+  //     set : function () {
+  //       return ''
+  //     },
+  //   },
+  //   {
+  //     property : 'away.result',
+  //     get : function () {
+  //       if ( this.away.score > this.home.score ) {
+  //         return 'W';
+  //       } else if ( this.home.score === this.away.score ) {
+  //         return 'T';
+  //       } else {
+  //         return 'L';
+  //       }
+  //     },
+  //     set : function () {
+  //       return ''
+  //     }
+  //   }
+  // ]
 });
